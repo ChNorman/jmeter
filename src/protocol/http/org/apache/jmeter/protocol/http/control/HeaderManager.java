@@ -33,6 +33,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.jmeter.config.ConfigTestElement;
 import org.apache.jmeter.gui.Replaceable;
 import org.apache.jmeter.testelement.TestElement;
+import org.apache.jmeter.testelement.TestStateListener;
 import org.apache.jmeter.testelement.property.CollectionProperty;
 import org.apache.jmeter.testelement.property.JMeterProperty;
 import org.apache.jorphan.util.JOrphanUtils;
@@ -42,9 +43,11 @@ import org.apache.jorphan.util.JOrphanUtils;
  * with a request.
  *
  */
-public class HeaderManager extends ConfigTestElement implements Serializable, Replaceable {
+public class HeaderManager extends ConfigTestElement implements TestStateListener, Serializable, Replaceable {
 
     private static final long serialVersionUID = 240L;
+    private static final String CLEAR = "AuthManager.clearEachIteration";
+    private static final boolean USE_AWS_AUTH = false;
 
     public static final String HEADERS = "HeaderManager.headers";// $NON-NLS-1$
 
@@ -59,6 +62,9 @@ public class HeaderManager extends ConfigTestElement implements Serializable, Re
         setProperty(new CollectionProperty(HEADERS, new ArrayList<>()));
     }
 
+    public void setClearEachIteration(boolean clear) {
+        setProperty(CLEAR, clear, USE_AWS_AUTH);
+    }
     /** {@inheritDoc} */
     @Override
     public void clear() {
@@ -304,5 +310,25 @@ public class HeaderManager extends ConfigTestElement implements Serializable, Re
             }
         }
         return totalReplaced;
+    }
+
+    @Override
+    public void testStarted() {
+
+    }
+
+    @Override
+    public void testStarted(String host) {
+
+    }
+
+    @Override
+    public void testEnded() {
+      //noop
+    }
+
+    @Override
+    public void testEnded(String host) {
+        //noop
     }
 }

@@ -26,25 +26,22 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
 
-import javax.swing.BorderFactory;
-import javax.swing.JButton;
-import javax.swing.JFileChooser;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JTable;
-import javax.swing.ListSelectionModel;
+import javax.swing.*;
 import javax.swing.table.AbstractTableModel;
 
+import net.sf.saxon.functions.ConstantFunction;
 import org.apache.jmeter.config.gui.AbstractConfigGui;
 import org.apache.jmeter.gui.GUIMenuSortOrder;
 import org.apache.jmeter.gui.util.FileDialoger;
 import org.apache.jmeter.gui.util.HeaderAsPropertyRenderer;
+import org.apache.jmeter.gui.util.HorizontalPanel;
 import org.apache.jmeter.protocol.http.control.Header;
 import org.apache.jmeter.protocol.http.control.HeaderManager;
 import org.apache.jmeter.testelement.TestElement;
 import org.apache.jmeter.util.JMeterUtils;
 import org.apache.jorphan.gui.GuiUtils;
+import org.apache.jorphan.gui.JLabeledTextField;
+import org.apache.jorphan.gui.layout.VerticalLayout;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -74,6 +71,13 @@ public class HeaderPanel extends AbstractConfigGui implements ActionListener {
     private JButton deleteButton;
     private JButton saveButton;
 
+    private JCheckBox useAWSAuth;
+    private JLabeledTextField AWSKey;
+    private JLabeledTextField AWSSecretKey;
+    private JLabeledTextField AWSRegion;
+    private JLabeledTextField AWSServiceName;
+    private JLabeledTextField AWSSessionToken;
+
     public HeaderPanel() {
         headerManager = new HeaderManager();
         tableModel = new InnerTableModel(headerManager);
@@ -83,6 +87,7 @@ public class HeaderPanel extends AbstractConfigGui implements ActionListener {
     @Override
     public TestElement createTestElement() {
         configureTestElement(headerManager);
+
         return (TestElement) headerManager.clone();
     }
 
@@ -125,8 +130,50 @@ public class HeaderPanel extends AbstractConfigGui implements ActionListener {
         setLayout(new BorderLayout());
         setBorder(makeBorder());
 
-        add(makeTitlePanel(), BorderLayout.NORTH);
+
+        JPanel northPanel = new JPanel();
+        northPanel.setLayout(new VerticalLayout(5, VerticalLayout.BOTH));
+        northPanel.add(makeTitlePanel());
+        northPanel.add(makeOptionsPane());
+        add(northPanel, BorderLayout.NORTH);
+
         add(createHeaderTablePanel(), BorderLayout.CENTER);
+    }
+
+    private JPanel makeOptionsPane(){
+        useAWSAuth = new JCheckBox("Use AWS Authorization headers", false);
+
+
+        JPanel optionsPane = new JPanel();
+        optionsPane.setBorder(BorderFactory.createTitledBorder(
+                BorderFactory.createEtchedBorder(),
+                JMeterUtils.getResString("auth_manager_options"))); // $NON-NLS-1$
+        optionsPane.setLayout(new VerticalLayout(5,  VerticalLayout.BOTH));
+        optionsPane.add(useAWSAuth);
+        optionsPane.add(makeAWSConfigurationPane());
+
+       return optionsPane;
+    }
+
+    private JPanel makeAWSConfigurationPane(){
+        AWSKey = new JLabeledTextField("AWS Access Key");
+        AWSSecretKey = new JLabeledTextField("AWS Secret Key");
+        AWSRegion = new JLabeledTextField("AWS Region");
+        AWSServiceName = new JLabeledTextField("Service Name");
+        AWSSessionToken = new JLabeledTextField("Session Token");
+        JPanel attributesPane = new JPanel();
+        attributesPane.setBorder(BorderFactory.createTitledBorder(
+                BorderFactory.createEtchedBorder(),
+                "Configuration")); // $NON-NLS-1$
+        attributesPane.setLayout(new VerticalLayout(5, VerticalLayout.BOTH));
+        attributesPane.add(AWSKey);
+        attributesPane.add(AWSSecretKey);
+        attributesPane.add(AWSRegion);
+        attributesPane.add(AWSServiceName);
+        attributesPane.add(AWSSessionToken);
+
+        return attributesPane;
+
     }
 
     private void checkButtonsStatus() {
